@@ -119,6 +119,7 @@ brew "starship"
 brew "jq"
 brew "fzf"
 brew "httpie"
+brew "mas"
 
 # Programming language prerequisites and package managers
 brew "libyaml" # should come after openssl
