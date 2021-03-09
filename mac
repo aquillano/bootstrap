@@ -118,6 +118,7 @@ brew "chezmoi"
 brew "starship"
 brew "jq"
 brew "fzf"
+brew "httpie"
 
 # Programming language prerequisites and package managers
 brew "libyaml" # should come after openssl
@@ -132,6 +133,7 @@ cask "visual-studio-code"
 cask "nova"
 cask "rocket"
 cask "choosy"
+cask "hazel"
 
 # Font
 cask "font-fira-code-nerd-font"
