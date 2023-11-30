@@ -8,50 +8,46 @@ trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 set -e
 
 fancy_echo() {
-  local fmt="$1"; shift
+	local fmt="$1"
+	shift
 
-  # shellcheck disable=SC2059
-  printf "\\n$fmt\\n" "$@"
+	# shellcheck disable=SC2059
+	printf "\\n$fmt\\n" "$@"
 }
 
 append_to_zshrc() {
-  local text="$1" zshrc
-  local skip_new_line="${2:-0}"
+	local text="$1" zshrc
+	local skip_new_line="${2:-0}"
 
-  # if [ -w "$HOME/.zshrc.local" ]; then
-    # zshrc="$HOME/.zshrc.local"
-  # else
-    # zshrc="$HOME/.zshrc"
-  # fi
 	zshrc="$HOME/.zshrc"
 
-  if ! grep -Fqs "$text" "$zshrc"; then
-    if [ "$skip_new_line" -eq 1 ]; then
-      printf "%s\\n" "$text" >> "$zshrc"
-    else
-      printf "\\n%s\\n" "$text" >> "$zshrc"
-    fi
-  fi
+	if ! grep -Fqs "$text" "$zshrc"; then
+		if [ "$skip_new_line" -eq 1 ]; then
+			printf "%s\\n" "$text" >>"$zshrc"
+		else
+			printf "\\n%s\\n" "$text" >>"$zshrc"
+		fi
+	fi
 }
 
 update_shell() {
-  local shell_path;
-  shell_path="$(command -v zsh)"
+	local shell_path
+	shell_path="$(command -v zsh)"
 
-  fancy_echo "Changing your shell to zsh ..."
-  if ! grep "$shell_path" /etc/shells > /dev/null 2>&1 ; then
-    fancy_echo "Adding '$shell_path' to /etc/shells"
-    sudo sh -c "echo $shell_path >> /etc/shells"
-  fi
-  sudo chsh -s "$shell_path" "$USER"
+	fancy_echo "Changing your shell to zsh ..."
+	if ! grep "$shell_path" /etc/shells >/dev/null 2>&1; then
+		fancy_echo "Adding '$shell_path' to /etc/shells"
+		sudo sh -c "echo $shell_path >> /etc/shells"
+	fi
+	sudo chsh -s "$shell_path" "$USER"
 }
 
 if [ ! -d "$HOME/.bin/" ]; then
-  mkdir "$HOME/.bin"
+	mkdir "$HOME/.bin"
 fi
 
 if [ ! -f "$HOME/.zshrc" ]; then
-  touch "$HOME/.zshrc"
+	touch "$HOME/.zshrc"
 fi
 
 append_to_zshrc 'export PATH="$HOME/.bin:$PATH"'
@@ -59,42 +55,42 @@ append_to_zshrc 'export PATH="$HOME/.bin:$PATH"'
 HOMEBREW_PREFIX="/usr/local"
 
 if [ -d "$HOMEBREW_PREFIX" ]; then
-  if ! [ -r "$HOMEBREW_PREFIX" ]; then
-    sudo chown -R "$LOGNAME:admin" /usr/local
-  fi
+	if ! [ -r "$HOMEBREW_PREFIX" ]; then
+		sudo chown -R "$LOGNAME:admin" /usr/local
+	fi
 else
-  sudo mkdir "$HOMEBREW_PREFIX"
-  sudo chflags norestricted "$HOMEBREW_PREFIX"
-  sudo chown -R "$LOGNAME:admin" "$HOMEBREW_PREFIX"
+	sudo mkdir "$HOMEBREW_PREFIX"
+	sudo chflags norestricted "$HOMEBREW_PREFIX"
+	sudo chown -R "$LOGNAME:admin" "$HOMEBREW_PREFIX"
 fi
 
 case "$SHELL" in
-  */zsh)
-    if [ "$(command -v zsh)" != '/usr/local/bin/zsh' ] ; then
-      update_shell
-    fi
-    ;;
-  *)
-    update_shell
-    ;;
+*/zsh)
+	if [ "$(command -v zsh)" != '/usr/local/bin/zsh' ]; then
+		update_shell
+	fi
+	;;
+*)
+	update_shell
+	;;
 esac
 
 if ! command -v brew >/dev/null; then
-  fancy_echo "Installing Homebrew ..."
-    curl -fsS \
-      'https://raw.githubusercontent.com/Homebrew/install/master/install' | ruby
+	fancy_echo "Installing Homebrew ..."
+	curl -fsS \
+		'https://raw.githubusercontent.com/Homebrew/install/master/install' | ruby
 
-    append_to_zshrc '# recommended by brew doctor'
+	append_to_zshrc '# recommended by brew doctor'
 
-    # shellcheck disable=SC2016
-    append_to_zshrc 'export PATH="/usr/local/bin:$PATH"' 1
+	# shellcheck disable=SC2016
+	append_to_zshrc 'export PATH="/usr/local/bin:$PATH"' 1
 
-    export PATH="/usr/local/bin:$PATH"
+	export PATH="/usr/local/bin:$PATH"
 fi
 
 if brew list --formulae | grep -Fq brew-cask; then
-  fancy_echo "Uninstalling old Homebrew-Cask ..."
-  brew uninstall --force brew-cask
+	fancy_echo "Uninstalling old Homebrew-Cask ..."
+	brew uninstall --force brew-cask
 fi
 
 fancy_echo "Updating Homebrew formulae ..."
@@ -125,7 +121,7 @@ brew "mas"
 brew "libyaml" # should come after openssl
 brew "coreutils"
 brew "yarn"
-cask "gpg-suite"
+# cask "gpg-suite"
 
 # Apps
 cask "iterm2"
@@ -156,42 +152,42 @@ append_to_zshrc 'alias vim=nvim'
 append_to_zshrc 'eval "$(starship init zsh)"'
 
 if [ ! -f "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim ]; then
-  fancy_echo "Install vim-plug for Neovim ..."
-  curl -fsSLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
-       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+	fancy_echo "Install vim-plug for Neovim ..."
+	curl -fsSLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
+		https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 fi
 
 if [ ! -d "$HOME/.asdf" ]; then
-  fancy_echo "Configuring asdf version manager ..."
-  git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.0
-  append_to_zshrc "source $HOME/.asdf/asdf.sh"
+	fancy_echo "Configuring asdf version manager ..."
+	git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.0
+	append_to_zshrc "source $HOME/.asdf/asdf.sh"
 fi
 
 add_or_update_asdf_plugin() {
-  local name="$1"
-  local url="$2"
+	local name="$1"
+	local url="$2"
 
-  if ! asdf plugin-list | grep -Fq "$name"; then
-    asdf plugin-add "$name" "$url"
-  else
-    asdf plugin-update "$name"
-  fi
+	if ! asdf plugin-list | grep -Fq "$name"; then
+		asdf plugin-add "$name" "$url"
+	else
+		asdf plugin-update "$name"
+	fi
 }
 
 install_asdf_language() {
-  local language="$1"
-  local version
-  version="$(asdf list-all "$language" | grep -v "[a-z]" | tail -1)"
+	local language="$1"
+	local version
+	version="$(asdf list-all "$language" | grep -v "[a-z]" | tail -1)"
 
-  if ! asdf list "$language" | grep -Fq "$version"; then
-    asdf install "$language" "$version"
+	if ! asdf list "$language" | grep -Fq "$version"; then
+		asdf install "$language" "$version"
 		if [ "$language" == "python" ]; then
 			asdf install python 2.7.13
 			asdf global python "$version" 2.7.13
 		else
 			asdf global "$language" "$version"
 		fi
-  fi
+	fi
 }
 
 source "$HOME/.asdf/asdf.sh"
@@ -207,8 +203,8 @@ fancy_echo "Installing latest Python ..."
 install_asdf_language "python" # latest + v2.7.13
 
 fancy_echo "Installing Neovim python support ..."
-pip install neovim && \
-pip3 install neovim 
+pip install neovim &&
+	pip3 install neovim
 
 fancy_echo "Installing Neovim NodeJS support ..."
 yarn global add neovim
@@ -220,11 +216,11 @@ fi\
 '
 
 if [ -f "$HOME/.mac.local" ]; then
-  fancy_echo "Running your customizations from ~/.mac.local ..."
-  # shellcheck disable=SC1090
-  . "$HOME/.mac.local"
+	fancy_echo "Running your customizations from ~/.mac.local ..."
+	# shellcheck disable=SC1090
+	. "$HOME/.mac.local"
 fi
 
 if [ -f "$HOME/.zshrc.local" ]; then
-  . "$HOME/.zshrc.local"
+	. "$HOME/.zshrc.local"
 fi
