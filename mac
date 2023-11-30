@@ -124,6 +124,7 @@ brew "yarn"
 # cask "gpg-suite"
 
 # Apps
+cask "1password"
 cask "iterm2"
 cask "hammerspoon"
 cask "visual-studio-code"
